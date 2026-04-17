@@ -27,7 +27,7 @@ jobs:
       - name: Instsll Hack Lang
         uses: hhvm/actions/install-hack@master
         with:
-          version: latest
+          version: nightly
           debug: false
 
       - name: Verify HHVM
