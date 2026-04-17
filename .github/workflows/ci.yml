@@ -12,10 +12,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup HHVM (latest)
+      - name: Setup HHVM
         uses: azjezz/setup-hhvm@v1
         with:
           version: latest
+          debug: false
+
+      - name: Clean environment and Install
+        run: |
+          if [ "$RUNNER_OS" = "Linux" ]; then
+            export DEBIAN_FRONTEND=noninteractive
+            # The '|| true' ensures the CI continues if hhvm isn't found
+            sudo apt-get remove -y hhvm || true
+            sudo apt-get autoremove -y
+            sudo apt-get update
+          fi
+        shell: bash
 
       - name: Install dependencies
         run: composer install --no-progress --no-interaction
