@@ -24,8 +24,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-composer-
 
-      - name: Setup HHVM
-        uses: azjezz/setup-hhvm@v1
+      - name: Instsll Hack Lang
+        uses: hhvm/actions/install-hack@master
         with:
           version: latest
           debug: false
