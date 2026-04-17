@@ -1,42 +1,70 @@
-name: Hack CI
+name: HHVM CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main, develop]
   pull_request:
 
 jobs:
-  ci:
+  hhvm:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 🧠 Cache dependencies (Composer + Hack)
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            vendor
+            ~/.composer/cache
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
 
       - name: Setup HHVM
         uses: azjezz/setup-hhvm@v1
         with:
-          version: nightly
+          version: latest
           debug: false
 
-      - name: Clean environment and Install
-        run: |
-          if [ "$RUNNER_OS" = "Linux" ]; then
-            export DEBIAN_FRONTEND=noninteractive
-            # The '|| true' ensures the CI continues if hhvm isn't found
-            sudo apt-get remove -y hhvm || true
-            sudo apt-get autoremove -y
-            sudo apt-get update
-          fi
-        shell: bash
+      - name: Verify HHVM
+        run: hhvm --version
 
+      # 📦 Install Composer (already handled, but ensure deps)
       - name: Install dependencies
-        run: composer install --no-progress --no-interaction
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
-      - name: Generate autoload
-        run: vendor/bin/hh-autoload
+      # 🧪 Hack Typechecking
+      - name: Run Hack Typecheck
+        run: |
+          hh_client || (echo "Typecheck failed" && exit 1)
 
-      # - name: Typecheck with hh_client
-      #   run: hh_client
+      # 🧹 Hack Formatting Check
+      - name: Check formatting (hackfmt)
+        run: |
+          if ! command -v hackfmt &> /dev/null; then
+            echo "hackfmt not found"
+            exit 1
+          fi
+          hackfmt --test .
 
-      # - name: Run tests
-      #   run: hhvm vendor/bin/hacktest tests/   # or your test command
+      # 🔍 Linting with HHAST (if installed)
+      - name: Run HHAST Lint
+        run: |
+          if [ -f vendor/bin/hhast-lint ]; then
+            vendor/bin/hhast-lint
+          else
+            echo "HHAST not installed, skipping"
+          fi
+
+      # 🧪 Optional: Run PHPUnit (if PHP interop)
+      - name: Run tests
+        run: |
+          if [ -f vendor/bin/phpunit ]; then
+            vendor/bin/phpunit --testdox
+          else
+            echo "PHPUnit not installed, skipping"
+          fi
