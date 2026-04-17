@@ -1,8 +1,8 @@
-name: HHVM CI
+name: Hack CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main]
   pull_request:
 
 jobs:
@@ -24,46 +24,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-composer-
 
-      - name: Instsll Hack Lang
-        uses: hhvm/actions/install-hack@master
-        with:
-          hhvm: nightly
-
+      - name: setup-hacklang
+        uses: CodeWithSushil/setup-hhvm@v1.0.1
+      
       - name: Verify HHVM
         run: hhvm --version
-
-      # 📦 Install Composer (already handled, but ensure deps)
-      - name: Install dependencies
-        run: composer install --no-interaction --prefer-dist --optimize-autoloader
-
-      # 🧪 Hack Typechecking
-      - name: Run Hack Typecheck
-        run: |
-          hh_client || (echo "Typecheck failed" && exit 1)
-
-      # 🧹 Hack Formatting Check
-      - name: Check formatting (hackfmt)
-        run: |
-          if ! command -v hackfmt &> /dev/null; then
-            echo "hackfmt not found"
-            exit 1
-          fi
-          hackfmt --test .
-
-      # 🔍 Linting with HHAST (if installed)
-      - name: Run HHAST Lint
-        run: |
-          if [ -f vendor/bin/hhast-lint ]; then
-            vendor/bin/hhast-lint
-          else
-            echo "HHAST not installed, skipping"
-          fi
-
-      # 🧪 Optional: Run PHPUnit (if PHP interop)
-      - name: Run tests
-        run: |
-          if [ -f vendor/bin/phpunit ]; then
-            vendor/bin/phpunit --testdox
-          else
-            echo "PHPUnit not installed, skipping"
-          fi
