@@ -15,7 +15,7 @@ jobs:
       - name: Setup HHVM
         uses: azjezz/setup-hhvm@v1
         with:
-          version: latest
+          version: nightly
           debug: false
 
       - name: Clean environment and Install
