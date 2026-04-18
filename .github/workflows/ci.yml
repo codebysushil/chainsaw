@@ -7,11 +7,12 @@ on:
 
 jobs:
   hhvm:
-    runs-on: ubuntu-slim
-
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:20.04
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # 🧠 Cache dependencies (Composer + Hack)
       - name: Cache Composer dependencies
@@ -24,8 +25,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-composer-
 
-      - name: setup-hacklang
-        uses: CodeWithSushil/setup-hhvm@v1.2.0
+      - name: Setup HHVM Action
+        uses: azjezz/setup-hhvm@v1.0.2
       
       - name: Verify HHVM
         run: hhvm --version
