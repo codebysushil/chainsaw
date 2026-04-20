@@ -13,4 +13,4 @@ jobs:
         uses: CodeWithSushil/setup-hhvm@v2.2
 
       - name: Running hack script
-        run: hhvm -v Eval.EnableNuma=0 examples/index.php
+        run: hhvm -c hhvm.ini examples/index.php
