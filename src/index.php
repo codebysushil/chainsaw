@@ -1,3 +1,6 @@
 <?hh
 
-echo "hello";
+<<__EntryPoint>>
+function main(): void {
+  echo "Hello World!\n";
+}
